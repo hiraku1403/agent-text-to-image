@@ -1,0 +1,148 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fc3e0bbc-f7ce-4ddf-b99c-ee2a583b39c5",
+      "name": "When chat message received",
+      "webhookId": "1822c909-efe0-4ab2-b2a1-f740fe935cc2"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "Você é um Diretor de Arte especialista em Hollywood. O usuário vai te enviar uma cena ou roteiro.\nSeu único trabalho é traduzir essa cena em um único prompt visual ultra-detalhado em inglês para o gerador de imagens FLUX.\n\nRegras estritas:\n1. Foque em termos cinematográficos: estilo de lente (e.g., 35mm anamorphic lens), iluminação (e.g., dramatic studio lighting, volumetric dust), e realismo (e.g., photorealistic, 8k resolution, highly detailed texture).\n2. Não use palavras abstratas como \"lindo\" ou \"fantástico\". Descreva o que está na cena de forma literal.\n3. Responda APENAS com o prompt em inglês. Não adicione saudações, explicações ou aspas. O seu output deve ser puramente o prompt."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "da76e9fb-7c99-4365-aaf2-29557581c4f3",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "1d3e782a-e771-4b82-9cfb-b12669e03e6f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "iEvnYwNLIHqkEet1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://image.pollinations.ai/p/{{ encodeURIComponent($('AI Agent').item.json.output.replace(/[\\r\\n]+/g, ' ').replace('--ar 16:9', '').trim()) }}?model=flux&width=1280&height=720",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        560,
+        0
+      ],
+      "id": "a1194220-774c-4cab-ad8d-649ecc31d5dd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        0
+      ],
+      "id": "867522f6-689f-4659-8ec1-fdf2817038f3",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "987f00a3-2a71-41f4-b78e-9f4d6858843b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "397f205ad08f28cbac216fb11372e22daa71c7adb143ff9d94762f8bf5371c52"
+  },
+  "nodeGroups": [],
+  "id": "lVt9s18vRWKlJYz4",
+  "tags": []
+}
